@@ -1,6 +1,6 @@
 # Transfer Learning Example: Cat vs. Dog Classification
 
-```This repository demonstrates the use of transfer learning for image classification, specifically distinguishing between cats and dogs, using a pre-trained ResNet-50 model.
+This repository demonstrates the use of transfer learning for image classification, specifically distinguishing between cats and dogs, using a pre-trained ResNet-50 model.
 
 ## Overview
 
@@ -83,85 +83,3 @@ Build a classifier to distinguish between images of cats and dogs using a limite
 
 4.  **Model Saving:**
     * The trained model will be saved as `cat_dog_classifier.h5`.
-
-## Code Example
-
-See the `cat_dog_classifier.py` file for the implementation details.
-import tensorflow as tf
-from tensorflow.keras.applications import ResNet50
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from tensorflow.keras.models import Model
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-import os
-
-# 1. Load the pre-trained model (ResNet50)
-base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-
-# 2. Modify the model
-x = base_model.output
-x = GlobalAveragePooling2D()(x) # Global average pooling to reduce dimensions
-x = Dense(1024, activation='relu')(x) # Add a dense layer
-predictions = Dense(2, activation='softmax')(x) # Output layer for 2 classes (cat/dog)
-
-model = Model(inputs=base_model.input, outputs=predictions)
-
-# 3. Freeze layers
-for layer in base_model.layers:
-    layer.trainable = False
-
-# 4. Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-# Data Preparation (Example using ImageDataGenerator)
-# Assuming you have 'train' and 'validation' directories with cat/dog subdirectories
-
-train_datagen = ImageDataGenerator(rescale=1./255,
-                                   shear_range=0.2,
-                                   zoom_range=0.2,
-                                   horizontal_flip=True)
-
-validation_datagen = ImageDataGenerator(rescale=1./255)
-
-train_generator = train_datagen.flow_from_directory(
-    'train',  # Replace with your training data directory
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='categorical')
-
-validation_generator = validation_datagen.flow_from_directory(
-    'validation', # Replace with your validation data directory
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='categorical')
-
-# 5. Train the model
-model.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // 32,
-    epochs=10, # Adjust epochs as needed
-    validation_data=validation_generator,
-    validation_steps=validation_generator.samples // 32)
-
-# 6. Fine-tuning (Optional)
-# Unfreeze some layers and continue training with a lower learning rate
-
-for layer in model.layers[140:]: #unfreeze last few layers, you may need to experiment.
-    layer.trainable = True
-
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), #very low learning rate
-              loss='categorical_crossentropy', metrics=['accuracy'])
-
-model.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // 32,
-    epochs=5, # Fine-tune for a few epochs
-    validation_data=validation_generator,
-    validation_steps=validation_generator.samples // 32)
-
-# Save the model
-```model.save("cat_dog_classifier.h5")
-
-
-
-
-
