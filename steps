@@ -1,5 +1,5 @@
 # Transfer Learning Example: Cat vs. Dog Classification
-
+```
 This repository demonstrates the use of transfer learning for image classification, specifically distinguishing between cats and dogs, using a pre-trained ResNet-50 model.
 
 ## Overview
@@ -160,7 +160,7 @@ model.fit(
 
 # Save the model
 model.save("cat_dog_classifier.h5")
-
+```
 
 
 
